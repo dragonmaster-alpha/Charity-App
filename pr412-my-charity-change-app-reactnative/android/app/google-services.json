@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "27552932411",
+    "firebase_url": "https://my-charity-change.firebaseio.com",
+    "project_id": "my-charity-change",
+    "storage_bucket": "my-charity-change.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27552932411:android:000b157d2ab840d88e321e",
+        "android_client_info": {
+          "package_name": "com.mycharitychange"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "27552932411-u6knsg4ne37nf0q2dt06necgjll6vrod.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkShRsbKHJco0zKMbWoJsBDhILhpkIfnM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "27552932411-u6knsg4ne37nf0q2dt06necgjll6vrod.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "27552932411-dh3vvgek93b60ag33l922e49iobgdia4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycharitychange"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

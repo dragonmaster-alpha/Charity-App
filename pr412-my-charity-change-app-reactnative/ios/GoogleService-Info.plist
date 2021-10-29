@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>27552932411-dh3vvgek93b60ag33l922e49iobgdia4.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.27552932411-dh3vvgek93b60ag33l922e49iobgdia4</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDhW38ON2c-0wpRF-4_No6rpgcKdP0c99Q</string>
+	<key>GCM_SENDER_ID</key>
+	<string>27552932411</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.mycharitychange</string>
+	<key>PROJECT_ID</key>
+	<string>my-charity-change</string>
+	<key>STORAGE_BUCKET</key>
+	<string>my-charity-change.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:27552932411:ios:e9ab9498736c7d2e8e321e</string>
+	<key>DATABASE_URL</key>
+	<string>https://my-charity-change.firebaseio.com</string>
+</dict>
+</plist>

@@ -1,0 +1,6 @@
+# version: 1
+# task_definition:
+#   task_size:
+#     cpu_limit: 512
+#     mem_limit: 512
+# #   task_execution_role: arn:aws:iam::896549618545:role/ecsTaskExecutionRole

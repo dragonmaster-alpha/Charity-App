@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  mcc-worker-dev:
+    image: 896549618545.dkr.ecr.us-east-1.amazonaws.com/mcc-back:{{tag}}
+    env_file:
+      - .env
+    # ports:
+    #   - 0:8000
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: mcc
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: worker-dev

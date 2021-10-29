@@ -1,0 +1,42 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+flask-sqlalchemy = "*"
+isort = "*"
+flask-basicauth = "*"
+flask-jwt-extended = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+marshmallow-validators = "*"
+connexion = {extras = ["swagger-ui"],version = "*"}
+flask-cors = "*"
+flask-migrate = "*"
+psycopg2-binary = "*"
+requests = "*"
+flask-admin = "*"
+python-jose = {extras = ["cryptography"],version = "*"}
+marshmallow-enum = "*"
+boto3 = "*"
+flask-s3 = "*"
+sentry-sdk = {extras = ["flask"],version = "*"}
+pika = "*"
+flask-apscheduler = "*"
+pillow = "*"
+pyfcm = "*"
+cairosvg = "*"
+pandas = "*"
+xlwt = "*"
+openpyxl = "*"
+stripe = "*"
+email-validator = "*"
+xlsxwriter = "*"
+pytz = "*"
+
+[requires]
+python_version = "3.8"

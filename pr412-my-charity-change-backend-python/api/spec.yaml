@@ -1,0 +1,1016 @@
+openapi: 3.0.1
+info:
+  title: MyCharityChange API
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api/v1
+  - url: https://mcc-back-dev.appelloproject.xyz/api/v1
+  - url: https://mcc-back-stage.appelloproject.xyz/api/v1
+tags:
+  - name: Customer
+    description: Endpoints for customers
+  - name: Charity
+    description: Endpoints for charities
+  - name: Validation
+    description: Endpoints for validation of charity registration steps
+  - name: Verification
+    description: Endpoints to deal with email verification for Charity
+  - name: Category
+    description: Endpoints for categories
+  - name: Plan
+    description: Endpoints for plans
+  - name: Basiq.io
+    description: Endpoints for Basiq.io api
+paths:
+  /api/v1/customer/signup:
+    post:
+      summary: Signup as customer
+      tags: 
+        - Customer
+      description: Signup as customer. If the customer is new - he will be registered. If the user already had been registered, the passwords will be compared. And if they match, the user will be logged in.
+      operationId: api.routes.signup_customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: some@ema.il
+                password:
+                  type: string
+                  example: Secretpass2
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                device_token:
+                  type: string
+                  example: sometoken
+              required:
+                - email
+                - password
+                - first_name
+                - last_name
+                - device_token
+      responses:
+        '200':
+          description: A JSON object with access token and user id
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODIyODAyNzYsIm5iZiI6MTU4MjI4MDI3NiwianRpIjoiMjc4OTY5NDUtNjA0YS00ZWU3LTk4ODQtNGJkM2FhZGJlZTViIiwiZXhwIjoxNTkwMDU2Mjc2LCJpZGVudGl0eSI6ImpvaG44QGRvZS5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJ1c2VyX2NsYWltcyI6eyJ0eXBlIjoiY3VzdG9tZXIifX0.4VD_rdKygWYT07wGfXsTw_YahdUwSq1Dfpe3_OFD04g
+                  user_id:
+                    type: integer
+                    example: 1  
+        '400':
+          description: Bad request with details
+  /api/v1/customer/send_report:
+    get:
+      summary: Add customer to the queue to send a tax receipt
+      tags: 
+        - Customer
+      operationId: api.routes.customer_send_report
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Customer add to the queue. Email will be sent within an hour.
+  /api/v1/customer/{user_id}/impact:
+    get:
+      summary: Get data for the customer's impact screen
+      tags:
+        - Customer
+      description: Get data for the customer's impact screen
+      operationId: api.routes.get_impact
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get 
+          example: 4
+      responses:
+        '200':
+          description: A JSON object with customer's impact data
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+  /api/v1/customer/{user_id}/cards:
+    get:
+      summary: Get customer's card
+      tags:
+        - Customer
+      description: Get customer's card
+      operationId: api.routes.get_card
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+      responses:
+        '200':
+          description: A JSON object with result message
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+    post:
+      summary: Add customer's card
+      tags:
+        - Customer
+      description: Add customer's card
+      operationId: api.routes.add_card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_number:
+                  type: string
+                  example: "4242424242424242"
+                card_holder:
+                  type: string
+                  example: John Doe
+                card_expiration:
+                  type: string
+                  example: 08/24
+                card_cvc:
+                  type: string
+                  example: "552"
+              required:
+                - card_number
+                - card_holder
+                - card_expiration
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+      responses:
+        '200':
+          description: A JSON object with result message
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+  /api/v1/customer/{user_id}/transactions:
+    get:
+      summary: Get donated transactions of the customer for 10 days
+      tags:
+        - Customer
+      description: Get donated transactions of the customer for 10 days
+      operationId: api.routes.load_transactions
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+        - in: query
+          name: page
+          schema:
+            type: string
+          required: false
+          description: The page number of the next transactions list
+          example: 1  
+      responses:
+        '200':
+          description: A JSON object with transactions sorted by date desc
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+  /api/v1/customer/{user_id}/profile:
+    get:
+      summary: Get customer's profile
+      tags:
+        - Customer
+      description: Get customer's profile
+      operationId: api.routes.get_profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+      responses:
+        '200':
+          description: A JSON object with customer's profile data
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+    put:
+      summary: Update customer's profile
+      tags:
+        - Customer
+      description: Update customer's profile
+      operationId: api.routes.update_profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weekly_goal:
+                  type: integer
+                  example: 100
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  example: some@ema.il 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+      responses:
+        '200':
+          description: A JSON object with customer's profile data
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+  /api/v1/customer/{user_id}/charities:
+    get:
+      summary: Get list of approved charities with selected by customer
+      tags:
+        - Customer
+      description: Get list of approved charities with selected by customer
+      operationId: api.routes.get_customer_charities
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+        - in: query
+          name: categories
+          schema:
+            type: string
+          required: false
+          description: Filter charities by categories
+          example:  Housing,Education
+        - in: query
+          name: search
+          schema:
+            type: string
+          required: false
+          description: Search charity by name
+          example: charity  
+      responses:
+        '200':
+          description: A JSON object with charities
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed  
+    put:
+      summary: Update customer's charities
+      tags:
+        - Customer
+      description: Update customer's charities
+      operationId: api.routes.update_customer_charities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                charity_ids:
+                  type: array
+                  example: [1, 2, 14]
+              required:
+                - charity_ids
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the customer to get
+          example: 4
+      responses:
+        '200':
+          description: A JSON object with result message
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Customer not found
+        '422':
+          description: Signature verification failed 
+
+
+  /api/v1/charity/register:
+    post:
+      summary: Register new charity
+      tags: 
+        - Charity
+      description: Register new charity
+      operationId: api.routes.register_charity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: some@ema.il
+                password:
+                  type: string
+                  example: Secretpass2    
+                name:
+                  type: string
+                  example: Movember Foundation
+                business_name:
+                  type: string
+                  example: Movember Foundation PTY
+                category_id:
+                  type: integer
+                  example: 3
+                details:
+                  type: string
+                  example: Details about Charity
+                abn:
+                  type: string
+                  example: "24719196762"
+                bank_name:
+                  type: string
+                  example: NAB bank
+                bank_bsb:
+                  type: string
+                  example: 082-902
+                bank_account:
+                  type: string
+                  example: "123456789"
+                stripe_custom_account_id:
+                  type: string
+                  example: acct_1GMLaeGMgyExOdjg
+                plan_id:
+                  type: integer
+                  example: 2
+                card_number:
+                  type: string
+                  example: "4242424242424242"
+                card_holder:
+                  type: string
+                  example: John Doe
+                card_expiration:
+                  type: string
+                  example: 08/24
+                card_cvc:
+                  type: string
+                  example: "552"
+                stripe_card_id:
+                  type: string
+                  example: card_1Gk2zRGMgyExOdjg1XFeY2VP
+                stripe_customer_id:
+                  type: string
+                  example: cus_HLiss8nWVPMCoo
+                logo:
+                  type: string
+                  format: binary
+                image:
+                  type: string
+                  format: binary
+              required:
+                - email
+                - password
+                - name
+                - business_name
+                - category_id
+                - abn
+                - bank_name
+                - bank_bsb
+                - bank_account
+                - stripe_custom_account_id
+                - plan_id
+                - card_number
+                - card_holder
+                - card_expiration
+                - stripe_card_id
+                - stripe_customer_id
+                - logo
+      responses:
+        '200':
+          description: A JSON object with access token and charity_id
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODIyODAyNzYsIm5iZiI6MTU4MjI4MDI3NiwianRpIjoiMjc4OTY5NDUtNjA0YS00ZWU3LTk4ODQtNGJkM2FhZGJlZTViIiwiZXhwIjoxNTkwMDU2Mjc2LCJpZGVudGl0eSI6ImpvaG44QGRvZS5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJ1c2VyX2NsYWltcyI6eyJ0eXBlIjoiY3VzdG9tZXIifX0.4VD_rdKygWYT07wGfXsTw_YahdUwSq1Dfpe3_OFD04g
+                  charity_id:
+                    type: integer
+                    example: 4
+        '400':
+          description: Bad request with details
+  /api/v1/charity/login:
+    post:
+      summary: Charity login
+      tags: 
+        - Charity
+      description: Charity login
+      operationId: api.routes.login_charity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: some@ema.il
+                password:
+                  type: string
+                  example: Secretpass2                                                  
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: A JSON object with access token
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '400':
+          description: Bad request with details
+  /api/v1/charity/{charity_id}:
+    get:
+      summary: Get charity
+      tags:
+        - Charity
+      description: Get charity
+      operationId: api.routes.get_charity
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: charity_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the charity to get
+          example: 1
+      responses:
+        '200':
+          description: A JSON object with charity data
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Charity not found
+        '422':
+          description: Signature verification failed
+    put:
+      summary: Update charity settings
+      tags:
+        - Charity
+      description: Update charity settings
+      operationId: api.routes.update_charity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Movember Foundation
+                business_name:
+                  type: string
+                  example: Movember Foundation PTY
+                category_id:
+                  type: integer
+                  example: 3
+                details:
+                  type: string
+                  example: Details about Charity
+                plan_id:
+                  type: integer
+                  example: 2
+                abn:
+                  type: string
+                  example: "24719196762"
+                bank:
+                  type: object
+                  properties:
+                    bank_name:
+                      type: string
+                      example: NAB bank
+                    bank_bsb:
+                      type: string
+                      example: 082-902
+                    bank_account:
+                      type: string
+                      example: "123456789"
+                  required:
+                    - bank_name
+                    - bank_bsb
+                    - bank_account 
+                card:
+                  type: object
+                  properties:
+                    card_number:
+                      type: string
+                      example: "4242424242424242"
+                    card_holder:
+                      type: string
+                      example: John Doe
+                    card_expiration:
+                      type: string
+                      example: 08/24
+                    card_cvc:
+                      type: string
+                      example: "552"
+                  required:
+                    - card_number
+                    - card_holder
+                    - card_expiration
+                logo:
+                  type: string
+                  format: binary
+                image:
+                  type: string
+                  format: binary
+                  nullable: true 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: charity_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the charity to get
+          example: 1
+      responses:
+        '200':
+          description: A JSON object with charity data
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Charity not found
+        '422':
+          description: Signature verification failed
+  /api/v1/charity/{charity_id}/dashboard:
+    get:
+      summary: Get list of donations
+      tags:
+        - Charity
+      description: Get list of donations
+      operationId: api.routes.get_dashboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: charity_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the charity to get
+          example: 1
+        - in: query
+          name: page
+          schema:
+            type: string
+          required: false
+          description: The page number of the donations
+          example: 1
+      responses:
+        '200':
+          description: A JSON object with donations
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Charity not found
+        '422':
+          description: Signature verification failed
+  /api/v1/charity/{charity_id}/stats:
+    get:
+      summary: Get stats for charity dashboard
+      tags:
+        - Charity
+      description: Get stats for charity dashboard
+      operationId: api.routes.get_stats
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: charity_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the charity to get
+          example: 1
+      responses:
+        '200':
+          description: A JSON object with stats for charity dashboard
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Charity not found
+        '422':
+          description: Signature verification failed 
+  /api/v1/charity/{charity_id}/donations/{donation_id}/csv:
+    get:
+      summary: Download csv with details of donation
+      tags:
+        - Charity
+      description: Download csv with details of donation
+      operationId: api.routes.download_csv
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: charity_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the charity to get
+          example: 1
+        - in: path
+          name: donation_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the donation to get
+          example: 1
+      responses:
+        '200':
+          description: A csv file with donation details
+        '401':
+          description: Missing Authorization Header
+        '404':
+          description: Charity or Donation not found
+        '422':
+          description: Signature verification failed 
+   
+          
+  /api/v1/charity/validation/email:
+    post:
+      summary: Validate email and password of the new charity
+      tags: 
+        - Validation
+      description: Validate email and password of the new charity
+      operationId: api.routes.validate_charity_email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: some@ema.il
+                password:
+                  type: string
+                  example: Secretpass2                                                  
+                confirm_password:
+                  type: string
+                  example: Secretpass2  
+              required:
+                - email
+                - password
+                - confirm_password
+      responses:
+        '200':
+          description: A JSON object with confirmation
+        '400':
+          description: Bad request with details
+  /api/v1/charity/validation/information:
+    post:
+      summary: Validate information of the  charity
+      tags: 
+        - Validation
+      description: Validate information of the charity
+      operationId: api.routes.validate_charity_information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Movember Foundation
+                business_name:
+                  type: string
+                  example: Movember Foundation PTY
+                category_id:
+                  type: integer
+                  example: 3
+                details:
+                  type: string
+                  example: Details about Charity
+                abn:
+                  type: string
+                  example: "24719196762"
+                logo:
+                  type: string
+                  format: binary
+                image:
+                  type: string
+                  format: binary  
+              required:
+                - name
+                - business_name
+                - category_id
+                - abn
+      responses:
+        '200':
+          description: A JSON object with details
+        '400':
+          description: Bad request with details
+  /api/v1/charity/validation/bank:
+    post:
+      summary: Validate bank account of the charity
+      tags: 
+        - Validation
+      description: Validate bank account of the charity
+      operationId: api.routes.validate_charity_bank
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bank_bsb:
+                  type: string
+                  example: 082-902
+                bank_account:
+                  type: string
+                  example: "123456789"
+                email:
+                  type: string
+                  example: john@doe.com
+              required:
+                - bank_bsb
+                - bank_account
+                - email
+      responses:
+        '200':
+          description: A JSON object with stripe_custom_account_id
+        '400':
+          description: Bad request with details
+  /api/v1/charity/validation/card:
+    post:
+      summary: Validate credit card of the charity
+      tags: 
+        - Validation
+      description: Validate credit card of the charity
+      operationId: api.routes.validate_charity_card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_number:
+                  type: string
+                  example: "4242424242424242"
+                card_expiration:
+                  type: string
+                  example: 08/24
+                card_cvc:
+                  type: string
+                  example: "552"
+              required:
+                - card_number
+                - card_expiration
+      responses:
+        '200':
+          description: A JSON object with stripe_customer_id and stripe_card_id
+        '400':
+          description: Bad request with details       
+
+
+  /api/v1/verification/{token}:
+    get:
+      summary: Verify Charity email
+      tags:
+        - Verification
+      description: Verify Charity email by token from the email
+      operationId: api.routes.verify_email
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Unique token for email verification
+          example: 7ff2a52299b241a1b13f44cf457dd65f
+      responses:
+        '200':
+          description: A JSON object with details
+        '400':
+          description: Bad request
+  /api/v1/verification/resend:
+    get:
+      summary: Resend verification email to the Charity email
+      tags:
+        - Verification
+      description: Resend verification email with token to the Charity email
+      operationId: api.routes.resend_verification_email
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A JSON object with details
+        '400':
+          description: Bad request
+
+
+  /api/v1/categories:
+    get:
+      summary: Get charity categories
+      tags:
+        - Category
+      description: Get charity categories
+      operationId: api.routes.get_categories
+      responses:
+        '200':
+          description: A JSON object with categories
+        '400':
+          description: Bad request
+
+
+  /api/v1/plans:
+    get:
+      summary: Get charity plans and its features
+      tags:
+        - Plan
+      description: Get charity plans and its features
+      operationId: api.routes.get_plans
+      responses:
+        '200':
+          description: A JSON object with plans and features
+        '400':
+          description: Bad request
+
+
+  /api/v1/basiq/institutions:
+    get:
+      summary: Get institutions sorted by tier
+      tags:
+        - Basiq.io
+      description: Get institutions sorted by tier
+      operationId: api.routes.get_banks
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: tier
+          schema:
+            type: string
+          required: false
+          description: Institution's tier - a representation of it's business and market share in the relevant country/region. Values range from 1 to 4. Tier 1 are Institutions with the highest impact on the market. For example, CBA is a Tier 1 Bank, Suncorp is a Tier 2 Bank, etc.
+          example: 1
+        - in: query
+          name: search
+          schema:
+            type: string
+          required: false
+          description: Search for institution names containing a search string
+          example: new   
+      responses:
+        '200':
+          description: A JSON object with institutions
+        '401':
+          description: Missing Authorization Header
+        '422':
+          description: Signature verification failed  
+  /api/v1/basiq/connections:
+    post:
+      summary: Add bank connection to the customer
+      tags: 
+        - Basiq.io
+      description: Add bank connection to the customer. This operation takes about 1 minute
+      operationId: api.routes.connect_bank
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 2
+                bank_id:
+                  type: string
+                  example: AU00000  
+                loginId:
+                  type: string
+                  example: Wentworth-Smith
+                password:
+                  type: string
+                  example: whislter
+                secondaryLoginId:
+                  type: string
+                  example: somelogin
+                securityCode:
+                  type: string
+                  example: "123456"
+              required:
+                - user_id
+                - bank_id
+                - loginId
+                - password
+      responses:
+        '200':
+          description: A JSON object
+          content:
+            application/json:
+              schema: 
+                type: object
+        '400':
+          description: Bad request with details
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: api.routes.decode_token

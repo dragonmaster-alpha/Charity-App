@@ -1,0 +1,228 @@
+kind: pipeline
+name: My Charity Change Back End
+
+
+# ------------------------------------------------------------------------------
+#
+# DEVELOPMENT EVNVIRONMENT
+#
+# ------------------------------------------------------------------------------
+
+# Base Image
+
+steps:
+- name: Build Dev Baseimage
+  image: plugins/ecr
+  settings:
+    region: us-east-1
+    repo: 896549618545.dkr.ecr.us-east-1.amazonaws.com/mcc-back
+    registry: 896549618545.dkr.ecr.us-east-1.amazonaws.com
+    dockerfile: .deploy/baseimage.Dockerfile
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    tags:
+      - dev_baseimage
+      # - tmp_dev_baseimage_${DRONE_COMMIT_SHA:0:3}
+  when:
+    branch: dev
+    event:
+    - push
+    # - pull_request
+
+
+# Flask app
+
+- name: Build Dev Flask
+  image: plugins/ecr
+  settings:
+    region: us-east-1
+    repo: 896549618545.dkr.ecr.us-east-1.amazonaws.com/mcc-back
+    registry: 896549618545.dkr.ecr.us-east-1.amazonaws.com
+    dockerfile: .deploy/dev/flask.Dockerfile
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    tags:
+      - dev_flask
+      # - tmp_dev_flask_${DRONE_COMMIT_SHA:0:3}
+  when:
+    branch: dev
+    event:
+    - push
+    # - pull_request
+
+
+- name: Deploy Dev Flask
+  image: kudato/drone-ecs-deploy
+  settings:
+    region: us-east-1
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    cluster: appello-cluster-dev-stage-1
+    service: mcc-flask-dev
+    compose_file: .deploy/dev/flask.docker-compose.yml
+    params_file: .deploy/dev/flask.ecs-params.yml
+    target_group_arn: arn:aws:elasticloadbalancing:us-east-1:896549618545:targetgroup/mcc-back-dev/9f9d203f2ced8b66
+    deploy_tag: dev_flask
+    container_name: mcc-flask-dev
+    container_port: 5000
+  when:
+    branch: dev
+    event:
+    - push
+    # - pull_request
+
+
+# ------------------------------------------------------------------------------
+#
+# STAGING EVNVIRONMENT
+#
+# ------------------------------------------------------------------------------
+
+# Base Image
+
+- name: Build Stage baseimage
+  image: plugins/ecr
+  settings:
+    region: us-east-1
+    repo: 896549618545.dkr.ecr.us-east-1.amazonaws.com/mcc-back
+    registry: 896549618545.dkr.ecr.us-east-1.amazonaws.com
+    dockerfile: .deploy/baseimage.Dockerfile
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    tags:
+      - stage_baseimage
+      # - tmp_stage_baseimage_${DRONE_COMMIT_SHA:0:3}
+  when:
+    branch: stage
+    event:
+    - push
+    # - pull_request
+
+
+# Flask app
+
+- name: Build Stage Flask
+  image: plugins/ecr
+  settings:
+    region: us-east-1
+    repo: 896549618545.dkr.ecr.us-east-1.amazonaws.com/mcc-back
+    registry: 896549618545.dkr.ecr.us-east-1.amazonaws.com
+    dockerfile: .deploy/stage/flask.Dockerfile
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    tags:
+      - stage_flask
+      # - tmp_stage_flask_${DRONE_COMMIT_SHA:0:3}
+  when:
+    branch: stage
+    event:
+    - push
+    # - pull_request
+
+
+- name: Deploy Stage Flask
+  image: kudato/drone-ecs-deploy
+  settings:
+    region: us-east-1
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    cluster: appello-cluster-dev-stage-1
+    service: mcc-flask-stage
+    compose_file: .deploy/stage/flask.docker-compose.yml
+    params_file: .deploy/stage/flask.ecs-params.yml
+    target_group_arn: arn:aws:elasticloadbalancing:us-east-1:896549618545:targetgroup/mcc-back-stage/f8e85c3739755c23
+    deploy_tag: stage_flask
+    container_name: mcc-flask-stage
+    container_port: 5000
+  when:
+    branch: stage
+    event:
+    - push
+    # - pull_request
+
+
+# ------------------------------------------------------------------------------
+#
+# PRODUCTION EVNVIRONMENT
+#
+# ------------------------------------------------------------------------------
+
+# Base Image
+
+- name: Build Prod baseimage
+  image: plugins/ecr
+  settings:
+    region: ap-southeast-2
+    repo: 716391694722.dkr.ecr.ap-southeast-2.amazonaws.com/mcc-back
+    registry: 716391694722.dkr.ecr.ap-southeast-2.amazonaws.com
+    dockerfile: .deploy/baseimage.Dockerfile
+    access_key:
+      from_secret: mcc_aws_access_key_id
+    secret_key:
+      from_secret: mcc_aws_secret_access_key
+    tags:
+      - prod_baseimage
+      # - tmp_prod_baseimage_${DRONE_COMMIT_SHA:0:3}
+  when:
+    branch: master
+    event:
+    - push
+    # - pull_request
+
+
+# Flask app
+
+- name: Build Prod Flask
+  image: plugins/ecr
+  settings:
+    region: ap-southeast-2
+    repo: 716391694722.dkr.ecr.ap-southeast-2.amazonaws.com/mcc-back
+    registry: 716391694722.dkr.ecr.ap-southeast-2.amazonaws.com
+    dockerfile: .deploy/prod/flask.Dockerfile
+    access_key:
+      from_secret: mcc_aws_access_key_id
+    secret_key:
+      from_secret: mcc_aws_secret_access_key
+    tags:
+      - prod_flask
+      # - tmp_prod_flask_${DRONE_COMMIT_SHA:0:3}
+  when:
+    branch: master
+    event:
+    - push
+    # - pull_request
+
+
+- name: Deploy Prod Flask
+  image: kudato/drone-ecs-deploy
+  settings:
+    region: ap-southeast-2
+    access_key:
+      from_secret: mcc_aws_access_key_id
+    secret_key:
+      from_secret: mcc_aws_secret_access_key
+    cluster: production
+    service: mcc-flask-prod
+    compose_file: .deploy/prod/flask.docker-compose.yml
+    params_file: .deploy/prod/flask.ecs-params.yml
+    deploy_tag: prod_flask
+    target_group_arn: arn:aws:elasticloadbalancing:ap-southeast-2:716391694722:targetgroup/mcc-prod/96a34db5856e7947
+    container_name: mcc-flask-prod
+    container_port: 5000
+  when:
+    branch: master
+    event:
+    - push
+    # - pull_request

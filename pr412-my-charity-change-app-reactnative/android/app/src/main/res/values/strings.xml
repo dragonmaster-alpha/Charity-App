@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MyCharityChange</string>
+    <string name="default_notification_channel_id" translatable="false">channel</string>
+</resources>

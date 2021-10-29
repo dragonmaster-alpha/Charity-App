@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  mcc-flask-prod:
+    image: 716391694722.dkr.ecr.ap-southeast-2.amazonaws.com/mcc-back:{{tag}}
+    env_file:
+      - .env
+    ports:
+      - 0:5000
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: mcc
+        awslogs-region: ap-southeast-2
+        awslogs-stream-prefix: flask-prod
